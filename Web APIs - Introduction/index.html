@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation to PHP</title>
+</head>
+<body>
+    <h1>Send Your Location to the Server</h1>
+    <button id="get-location">Get Location</button>
+    <p id="location-info"></p>
+
+    <script>
+        document.getElementById('get-location').addEventListener('click', () => {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        document.getElementById('location-info').textContent =
+                            `Latitude: ${latitude}, Longitude: ${longitude}`;
+
+                        // Send the location data to a PHP script
+                        fetch('save_location.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({
+                                latitude: latitude,
+                                longitude: longitude,
+                            }),
+                        })
+                        .then(response => response.text())
+                        .then(data => {
+                            console.log('Server response:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    },
+                    (error) => {
+                        document.getElementById('location-info').textContent =
+                            `Error getting location: ${error.message}`;
+                    }
+                );
+            } else {
+                document.getElementById('location-info').textContent =
+                    'Geolocation is not supported by this browser.';
+            }
+        });
+    </script>
+</body>
+</html>
